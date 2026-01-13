@@ -61,6 +61,6 @@ class AuthController extends Controller
 
         auth()->login($user);
 
-        return redirect('/sheet-stats'); // Change as needed
+        return redirect('/login'); // Change as needed
     }
 }
