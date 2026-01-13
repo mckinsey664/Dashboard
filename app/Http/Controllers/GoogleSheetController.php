@@ -13,6 +13,9 @@ class GoogleSheetController extends Controller
 
     public function index()
     {
+
+        dd('START 1');
+
         set_time_limit(300); // allow up to 5 minutes
         $client = new Client();
         $client->setApplicationName('Laravel Google Sheets');
@@ -73,11 +76,13 @@ class GoogleSheetController extends Controller
 private function getClient()
 {
     $client = new Client();
+    dd('START sheetStats');
+
     $client->setApplicationName('RFQ-PO Dashboard');
     $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
     $client->setAuthConfig(
     json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
-);
+    );
 
 
     return $client;
