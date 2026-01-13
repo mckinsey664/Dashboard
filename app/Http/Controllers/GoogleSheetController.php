@@ -108,7 +108,10 @@ class GoogleSheetController extends Controller
         $client = new \Google\Client();
         $client->setApplicationName('Laravel Google Sheets');
         $client->setScopes([\Google\Service\Sheets::SPREADSHEETS_READONLY]);
-        $client->setAuthConfig(Storage::path('google/credentials.json'));
+        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS', '/etc/secrets/credentials.json');
+        $client->setAuthConfig($credentialsPath);
+
+        //$client->setAuthConfig(Storage::path('google/credentials.json'));
         $client->setAccessType('offline');
 
         $tokenPath = Storage::path('google/token.json');
