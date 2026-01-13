@@ -4,10 +4,24 @@ FROM php:8.2-cli
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    zip \
+    curl \
     libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
     sqlite3 \
     libsqlite3-dev \
-    && docker-php-ext-install zip pdo pdo_sqlite
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install \
+        zip \
+        pdo \
+        pdo_sqlite \
+        mbstring \
+        xml \
+        gd
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -18,13 +32,16 @@ WORKDIR /var/www
 # Copy project files
 COPY . .
 
+# Ensure SQLite DB directory exists
+RUN mkdir -p database && touch database/database.sqlite
+
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Laravel permissions
-RUN chmod -R 775 storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache database
 
-# Expose port
+# Expose Render port
 EXPOSE 10000
 
 # Start Laravel
