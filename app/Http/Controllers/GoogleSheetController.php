@@ -17,7 +17,10 @@ class GoogleSheetController extends Controller
         $client = new Client();
         $client->setApplicationName('Laravel Google Sheets');
         $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-        $client->setAuthConfig('/etc/secrets/credentials.json');
+        $client->setAuthConfig(
+            json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
+        );
+
 
 
         $service = new Sheets($client);
@@ -72,7 +75,10 @@ private function getClient()
     $client = new Client();
     $client->setApplicationName('RFQ-PO Dashboard');
     $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-    $client->setAuthConfig('/etc/secrets/credentials.json');
+    $client->setAuthConfig(
+    json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
+);
+
 
     return $client;
 }
