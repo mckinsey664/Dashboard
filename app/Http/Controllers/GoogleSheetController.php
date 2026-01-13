@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 
 
-
 class GoogleSheetController extends Controller
 {
 
@@ -18,25 +17,8 @@ class GoogleSheetController extends Controller
         $client = new Client();
         $client->setApplicationName('Laravel Google Sheets');
         $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-        $client->setAuthConfig(Storage::path('google/credentials.json'));
-        $client->setAccessType('offline');
+        $client->setAuthConfig('/etc/secrets/credentials.json');
 
-        // Load token.json if exists
-        $tokenPath = Storage::path('google/token.json');
-        if (file_exists($tokenPath)) {
-            $accessToken = json_decode(file_get_contents($tokenPath), true);
-            $client->setAccessToken($accessToken);
-        }
-
-        // If token expired, refresh or prompt authorization
-        if ($client->isAccessTokenExpired()) {
-            if ($client->getRefreshToken()) {
-                $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-            } else {
-                return redirect($client->createAuthUrl());
-            }
-            file_put_contents($tokenPath, json_encode($client->getAccessToken()));
-        }
 
         $service = new Sheets($client);
 
@@ -68,28 +50,9 @@ class GoogleSheetController extends Controller
         return view('google_sheets', compact('values'));
     }
 
-    public function oauth2callback()
-    {
-        $client = new Client();
-        $client->setAuthConfig(Storage::path('google/credentials.json'));
-        $client->setRedirectUri(url('/oauth2callback'));
-        $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-        $client->setAccessType('offline');
-
-        $code = request('code');
-        $accessToken = $client->fetchAccessTokenWithAuthCode($code);
-        Storage::put('google/token.json', json_encode($accessToken));
-
-        return redirect('/sheet-stats');
-    }
-
     public function secondSheet()
     {
         $client = $this->getClient();
-
-        if ($client->isAccessTokenExpired() && !$client->getRefreshToken()) {
-        return redirect($client->createAuthUrl());
-        }
 
         $service = new Sheets($client);
         $spreadsheetId = '1DWxMnzTqCNaz9xTkQYcE0jDjukpD_9nnUogz5Cd8SLA';
@@ -102,43 +65,23 @@ class GoogleSheetController extends Controller
     }
 
 
-    // ✅ Move your OAuth client setup into a reusable private method
-    private function getClient()
-    {
-        $client = new \Google\Client();
-        $client->setApplicationName('Laravel Google Sheets');
-        $client->setScopes([\Google\Service\Sheets::SPREADSHEETS_READONLY]);
-        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS', '/etc/secrets/credentials.json');
-        $client->setAuthConfig($credentialsPath);
 
-        //$client->setAuthConfig(Storage::path('google/credentials.json'));
-        $client->setAccessType('offline');
 
-        $tokenPath = Storage::path('google/token.json');
-        if (file_exists($tokenPath)) {
-        $accessToken = json_decode(file_get_contents($tokenPath), true);
-        $client->setAccessToken($accessToken);
-        }
+private function getClient()
+{
+    $client = new Client();
+    $client->setApplicationName('RFQ-PO Dashboard');
+    $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
+    $client->setAuthConfig('/etc/secrets/credentials.json');
 
-        if ($client->isAccessTokenExpired()) {
-        if ($client->getRefreshToken()) {
-            $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-            file_put_contents($tokenPath, json_encode($client->getAccessToken()));
-        }
-        }
+    return $client;
+}
 
-        return $client;
-    }
 
     public function sheetStats()
     {
         set_time_limit(300); // allow up to 5 minutes
         $client = $this->getClient();
-        
-
-        if ($client->isAccessTokenExpired() && !$client->getRefreshToken()) {
-            return redirect($client->createAuthUrl());
-        }
 
         $service = new Sheets($client);
         Cache::forget('sheet_stats');
