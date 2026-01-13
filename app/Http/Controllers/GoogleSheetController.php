@@ -75,13 +75,16 @@ class GoogleSheetController extends Controller
 
 private function getClient()
 {
-    dd([
-        'env_exists' => env('GOOGLE_CREDENTIALS_JSON') !== null,
-        'raw' => env('GOOGLE_CREDENTIALS_JSON'),
-        'decoded' => json_decode(env('GOOGLE_CREDENTIALS_JSON'), true),
-        'json_error' => json_last_error_msg(),
-    ]);
+    $client = new Client();
+    $client->setApplicationName('RFQ-PO Dashboard');
+    $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
+    $client->setAuthConfig(
+        json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
+    );
+
+    return $client;
 }
+
 
 
 
