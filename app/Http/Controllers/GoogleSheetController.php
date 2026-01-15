@@ -184,33 +184,93 @@ class GoogleSheetController extends Controller
             }
 
             arsort($totals);
+
             $topClientsData = [];
-            $topClientName  = $topClientsData[0]['name']  ?? '';
-            $topClientValue = $topClientsData[0]['total'] ?? 0;
-
-            $lastClientName  = $topClientsData[count($topClientsData) - 1]['name']  ?? '';
-            $lastClientValue = $topClientsData[count($topClientsData) - 1]['total'] ?? 0;
-
-
             foreach (array_slice($totals, 0, 20, true) as $name => $total) {
                 $topClientsData[] = compact('name', 'total');
             }
 
+            $topClientName  = $topClientsData[0]['name']  ?? '';
+            $topClientValue = $topClientsData[0]['total'] ?? 0;
+
+            $lastIndex = count($topClientsData) - 1;
+            $lastClientName  = $topClientsData[$lastIndex]['name']  ?? '';
+            $lastClientValue = $topClientsData[$lastIndex]['total'] ?? 0;
+// ===========================
+// SAFE DEFAULTS (PREVENT BLADE CRASHES)
+// ===========================
+$topActiveClientsData = [];
+$topActiveClientName = '';
+$topActiveClientPercent = 0;
+$lastActiveClientName = '';
+$lastActiveClientPercent = 0;
+
+$topPassiveClientsData = [];
+$topPassiveClientName = '';
+$topPassiveClientPercent = 0;
+$lastPassiveClientName = '';
+$lastPassiveClientPercent = 0;
+
+$topActiveSuppliersData = [];
+$topActiveSupplierName = '';
+$topActiveSupplierPercent = 0;
+$lastActiveSupplierName = '';
+$lastActiveSupplierPercent = 0;
+
+$topPassiveSuppliersData = [];
+$topPassiveSupplierName = '';
+$topPassiveSupplierPercent = 0;
+$lastPassiveSupplierName = '';
+$lastPassiveSupplierPercent = 0;
+
+$supplierPreferences = [];
+$topClientsPerCategory = [];
+$topClientsPerBrand = [];
+
+
             // ===========================
             // RETURN FINAL STRUCTURE
             // ===========================
-            return [
-                'results' => $results,
-                'activeCount' => $activeCount,
-                'passiveCount' => $passiveCount,
-                'topClientsData' => $topClientsData,
-                
-                 // ✅ ADD THESE
-                'topClientName'    => $topClientName,
-                'topClientValue'   => $topClientValue,
-                'lastClientName'   => $lastClientName,
-                'lastClientValue'  => $lastClientValue,
-            ];
+return [
+    'results' => $results,
+    'activeCount' => $activeCount,
+    'passiveCount' => $passiveCount,
+
+    'topClientsData' => $topClientsData,
+    'topClientName' => $topClientName,
+    'topClientValue' => $topClientValue,
+    'lastClientName' => $lastClientName,
+    'lastClientValue' => $lastClientValue,
+
+    'topActiveClientsData' => $topActiveClientsData,
+    'topActiveClientName' => $topActiveClientName,
+    'topActiveClientPercent' => $topActiveClientPercent,
+    'lastActiveClientName' => $lastActiveClientName,
+    'lastActiveClientPercent' => $lastActiveClientPercent,
+
+    'topPassiveClientsData' => $topPassiveClientsData,
+    'topPassiveClientName' => $topPassiveClientName,
+    'topPassiveClientPercent' => $topPassiveClientPercent,
+    'lastPassiveClientName' => $lastPassiveClientName,
+    'lastPassiveClientPercent' => $lastPassiveClientPercent,
+
+    'topActiveSuppliersData' => $topActiveSuppliersData,
+    'topActiveSupplierName' => $topActiveSupplierName,
+    'topActiveSupplierPercent' => $topActiveSupplierPercent,
+    'lastActiveSupplierName' => $lastActiveSupplierName,
+    'lastActiveSupplierPercent' => $lastActiveSupplierPercent,
+
+    'topPassiveSuppliersData' => $topPassiveSuppliersData,
+    'topPassiveSupplierName' => $topPassiveSupplierName,
+    'topPassiveSupplierPercent' => $topPassiveSupplierPercent,
+    'lastPassiveSupplierName' => $lastPassiveSupplierName,
+    'lastPassiveSupplierPercent' => $lastPassiveSupplierPercent,
+
+    'supplierPreferences' => $supplierPreferences,
+    'topClientsPerCategory' => $topClientsPerCategory,
+    'topClientsPerBrand' => $topClientsPerBrand,
+];
+
             });
 
             return view('sheet_stats', $stats);
