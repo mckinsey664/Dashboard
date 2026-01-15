@@ -185,6 +185,12 @@ class GoogleSheetController extends Controller
 
             arsort($totals);
             $topClientsData = [];
+            $topClientName  = $topClientsData[0]['name']  ?? '';
+            $topClientValue = $topClientsData[0]['total'] ?? 0;
+
+            $lastClientName  = $topClientsData[count($topClientsData) - 1]['name']  ?? '';
+            $lastClientValue = $topClientsData[count($topClientsData) - 1]['total'] ?? 0;
+
 
             foreach (array_slice($totals, 0, 20, true) as $name => $total) {
                 $topClientsData[] = compact('name', 'total');
@@ -198,6 +204,12 @@ class GoogleSheetController extends Controller
                 'activeCount' => $activeCount,
                 'passiveCount' => $passiveCount,
                 'topClientsData' => $topClientsData,
+                
+                 // ✅ ADD THESE
+                'topClientName'    => $topClientName,
+                'topClientValue'   => $topClientValue,
+                'lastClientName'   => $lastClientName,
+                'lastClientValue'  => $lastClientValue,
             ];
             });
 
