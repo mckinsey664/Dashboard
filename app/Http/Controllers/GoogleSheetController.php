@@ -142,6 +142,12 @@ class GoogleSheetController extends Controller
             $colA = $this->safeGet($service, $SHEET_ID, $TAB.'A2:A');
             $colL = $this->safeGet($service, $SHEET_ID, $TAB.'L2:L');
 
+            // Clean column L (ignore empty, NA, N/A)
+            $cleanColL = array_filter($colL, function ($row) {
+                $v = strtoupper(trim($row[0] ?? ''));
+                return $v !== '' && $v !== 'NA' && $v !== 'N/A';
+            });
+
             $results = [
                 [
                     'name' => 'ITEMS FOR QUOTATION',
@@ -149,7 +155,7 @@ class GoogleSheetController extends Controller
                 ],
                 [
                     'name' => 'QUOTED ITEMS',
-                    'filled_count' => count(array_filter($colL)),
+                    'filled_count' => count($cleanColL),
                 ],
             ];
 
