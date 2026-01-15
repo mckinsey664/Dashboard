@@ -133,7 +133,7 @@ class GoogleSheetController extends Controller
             // ---------- CACHE ----------
             $stats = \Cache::remember('sheet_stats', now()->addMinutes(10), function () use ($service) {
 
-            $SHEET_ID = '1DWxMnzTqCNaz9xTkQYcE0jDjukpD_9nnUogz5Cd8SLA';
+            $SHEET_ID = '1Ibj2JAIB6xfg--RQ9BgviBZL8p1DFtSij97ILDThIko';
             $TAB = "'Priced Items info'!";
 
             // ===========================
