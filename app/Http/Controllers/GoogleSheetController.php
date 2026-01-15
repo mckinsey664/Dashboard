@@ -70,20 +70,155 @@ class GoogleSheetController extends Controller
         return view('google_sheets_second', compact('values'));
     }
 
+    private function getClient()
+    {
+        $client = new Client();
+        $client->setApplicationName('RFQ-PO Dashboard');
+        $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
+        $client->setAuthConfig(
+            json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
+        );
+        return $client;
+    }
+
+    // public function sheetStats()
+    // {
+    //     $client = $this->getClient();
+    //     $service = new \Google\Service\Sheets($client);
+
+    //     $spreadsheetId = '1DWxMnzTqCNaz9xTkQYcE0jDjukpD_9nnUogz5Cd8SLA';
+
+    //     // 🔴 USE EXACT TAB NAME (copy-paste from Google Sheets)
+    //     $range = 'Priced Items info!A1:A5';
+
+    //     $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+
+    //     return response()->json([
+    //         'ok' => true,
+    //         'data' => $response->getValues()
+    //     ]);
+    // }
+
+    private function safeGet(\Google\Service\Sheets $service, string $sheetId, string $range): array
+    {
+        try {
+            $response = $service->spreadsheets_values->get($sheetId, $range);
+            return $response->getValues() ?? [];
+        } catch (\Throwable $e) {
+            logger()->error('Google Sheets error', [
+                'sheet_id' => $sheetId,
+                'range' => $range,
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
+    }
+
+    public function sheetStats()
+    {
+        set_time_limit(300);
+
+        try {
+
+            // ---------- CLIENT ----------
+            $client = new \Google\Client();
+            $client->setApplicationName('RFQ-PO Dashboard');
+            $client->setScopes([\Google\Service\Sheets::SPREADSHEETS_READONLY]);
+            $client->setAuthConfig(
+                json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
+            );
+
+            $service = new \Google\Service\Sheets($client);
+
+            // ---------- CACHE ----------
+            $stats = \Cache::remember('sheet_stats', now()->addMinutes(10), function () use ($service) {
+
+            $SHEET_ID = '1DWxMnzTqCNaz9xTkQYcE0jDjukpD_9nnUogz5Cd8SLA';
+            $TAB = "'Priced Items info'!";
+
+            // ===========================
+            // 1️⃣ BASIC COUNTS
+            // ===========================
+            $colA = $this->safeGet($service, $SHEET_ID, $TAB.'A2:A');
+            $colL = $this->safeGet($service, $SHEET_ID, $TAB.'L2:L');
+
+            $results = [
+                [
+                    'name' => 'ITEMS FOR QUOTATION',
+                    'filled_count' => count(array_filter($colA)),
+                ],
+                [
+                    'name' => 'QUOTED ITEMS',
+                    'filled_count' => count(array_filter($colL)),
+                ],
+            ];
+
+            // ===========================
+            // 2️⃣ ACTIVE vs PASSIVE
+            // ===========================
+            $types = $this->safeGet($service, $SHEET_ID, $TAB.'I2:I');
+
+            $activeCount = 0;
+            $passiveCount = 0;
+
+            foreach ($types as $row) {
+                $v = strtolower(trim($row[0] ?? ''));
+                if ($v === 'active') $activeCount++;
+                if ($v === 'passive') $passiveCount++;
+            }
+
+            // ===========================
+            // 3️⃣ TOP CLIENTS BY VALUE
+            // ===========================
+            $clients = $this->safeGet($service, $SHEET_ID, $TAB.'E2:E');
+            $values  = $this->safeGet($service, $SHEET_ID, $TAB.'S2:S');
+
+            $totals = [];
+
+            for ($i = 0; $i < count($clients); $i++) {
+                $c = trim($clients[$i][0] ?? '');
+                $v = floatval($values[$i][0] ?? 0);
+                if ($c !== '') {
+                    $totals[$c] = ($totals[$c] ?? 0) + $v;
+                }
+            }
+
+            arsort($totals);
+            $topClientsData = [];
+
+            foreach (array_slice($totals, 0, 20, true) as $name => $total) {
+                $topClientsData[] = compact('name', 'total');
+            }
+
+            // ===========================
+            // RETURN FINAL STRUCTURE
+            // ===========================
+            return [
+                'results' => $results,
+                'activeCount' => $activeCount,
+                'passiveCount' => $passiveCount,
+                'topClientsData' => $topClientsData,
+            ];
+            });
+
+            return view('sheet_stats', $stats);
+
+        } catch (\Throwable $e) {
+
+        logger()->critical('sheetStats fatal error', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        abort(500, 'Dashboard temporarily unavailable');
+        }
+    }
 
 
 
-private function getClient()
-{
-    $client = new Client();
-    $client->setApplicationName('RFQ-PO Dashboard');
-    $client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-    $client->setAuthConfig(
-        json_decode(env('GOOGLE_CREDENTIALS_JSON'), true)
-    );
 
-    return $client;
-}
+    
+
 
 
 
@@ -605,22 +740,5 @@ private function getClient()
 
 
 
-public function sheetStats()
-{
-    $client = $this->getClient();
-    $service = new \Google\Service\Sheets($client);
-
-    $spreadsheetId = '1DWxMnzTqCNaz9xTkQYcE0jDjukpD_9nnUogz5Cd8SLA';
-
-    // 🔴 USE EXACT TAB NAME (copy-paste from Google Sheets)
-    $range = 'Priced Items info!A1:A5';
-
-    $response = $service->spreadsheets_values->get($spreadsheetId, $range);
-
-    return response()->json([
-        'ok' => true,
-        'data' => $response->getValues()
-    ]);
-}
 
 }
