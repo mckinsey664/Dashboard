@@ -136,28 +136,34 @@ class GoogleSheetController extends Controller
             $SHEET_ID = '1Ibj2JAIB6xfg--RQ9BgviBZL8p1DFtSij97ILDThIko';
             $TAB = "'Priced Items info'!";
 
-            // ===========================
-            // 1️⃣ BASIC COUNTS
-            // ===========================
-            $colA = $this->safeGet($service, $SHEET_ID, $TAB.'A2:A');
-            $colL = $this->safeGet($service, $SHEET_ID, $TAB.'L2:L');
+// ===========================
+// 1️⃣ BASIC COUNTS (SAFE)
+// ===========================
+$colA = $this->safeGet($service, $SHEET_ID, $TAB.'A2:A') ?? [];
+$colL = $this->safeGet($service, $SHEET_ID, $TAB.'L2:L') ?? [];
 
-            // Clean column L (ignore empty, NA, N/A)
-            $cleanColL = array_filter($colL, function ($row) {
-                $v = strtoupper(trim($row[0] ?? ''));
-                return $v !== '' && $v !== 'NA' && $v !== 'N/A';
-            });
+// Clean column A (ignore empty)
+$cleanColA = array_filter($colA, function ($row) {
+    return trim($row[0] ?? '') !== '';
+});
 
-            $results = [
-                [
-                    'name' => 'ITEMS FOR QUOTATION',
-                    'filled_count' => count(array_filter($colA)),
-                ],
-                [
-                    'name' => 'QUOTED ITEMS',
-                    'filled_count' => count($cleanColL),
-                ],
-            ];
+// Clean column L (ignore empty, NA, N/A)
+$cleanColL = array_filter($colL, function ($row) {
+    $v = strtoupper(trim($row[0] ?? ''));
+    return $v !== '' && $v !== 'NA' && $v !== 'N/A';
+});
+
+$results = [
+    [
+        'name' => 'ITEMS FOR QUOTATION',
+        'filled_count' => count($cleanColA),
+    ],
+    [
+        'name' => 'QUOTED ITEMS',
+        'filled_count' => count($cleanColL),
+    ],
+];
+
 
             // ===========================
             // 2️⃣ ACTIVE vs PASSIVE
