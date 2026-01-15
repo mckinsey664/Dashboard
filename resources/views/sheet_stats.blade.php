@@ -187,7 +187,7 @@
 @endphp
         @foreach($topPassiveClientsData as $client)
             @php
-                $barWidth = $maxQtyPassive > 0 ? ($client['count'] / $maxQtyPassive) * 100 : 0;
+                $barWidth = $maxQty > 0 ? ($client['count'] / $maxQtyPassive) * 100 : 0;
             @endphp
             <div style="display: flex; align-items: center; margin-bottom: 6px;">
                 <div style="width: 250px; font-size: 14px;">{{ $client['name'] }}</div>
@@ -220,7 +220,7 @@
 @endphp
         @foreach($topActiveSuppliersData as $supplier)
             @php
-                $barWidth = ($supplier['count'] / $maxQtySupplier) * 100;
+                $barWidth = ($supplier['count'] / $maxQty) * 100;
             @endphp
             <div style="display: flex; align-items: center; margin-bottom: 6px;">
                 <div style="width: 250px; font-size: 14px;">{{ $supplier['name'] }}</div>
@@ -254,7 +254,7 @@
 @endphp
         @foreach($topPassiveSuppliersData as $supplier)
             @php
-                $barWidth = ($supplier['count'] / $maxQtyPassiveSupplier) * 100;
+                $barWidth = ($supplier['count'] / $maxQty) * 100;
             @endphp
             <div style="display: flex; align-items: center; margin-bottom: 6px;">
                 <div style="width: 250px; font-size: 14px;">{{ $supplier['name'] }}</div>
