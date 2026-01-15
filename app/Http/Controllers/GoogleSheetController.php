@@ -139,17 +139,23 @@ class GoogleSheetController extends Controller
             // ===========================
             // 1️⃣ BASIC COUNTS
             // ===========================
-            $colA = $this->safeGet($service, $SHEET_ID, $TAB.'A2:A');
-            $colL = $this->safeGet($service, $SHEET_ID, $TAB.'L2:L');
+            $cleanColA = array_filter($colA, function ($row) {
+                return trim($row[0] ?? '') !== '';
+            });
+
+            $cleanColL = array_filter($colL, function ($row) {
+                $v = strtoupper(trim($row[0] ?? ''));
+                return $v !== '' && $v !== 'NA' && $v !== 'N/A';
+            });
 
             $results = [
                 [
                     'name' => 'ITEMS FOR QUOTATION',
-                    'filled_count' => count(array_filter($colA)),
+                    'filled_count' => count($cleanColA),
                 ],
                 [
                     'name' => 'QUOTED ITEMS',
-                    'filled_count' => count(array_filter($colL)),
+                    'filled_count' => count($cleanColL),
                 ],
             ];
 
