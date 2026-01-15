@@ -148,9 +148,10 @@
 
 <div style="display: flex; align-items: flex-start;">
     <div style="flex: 1;">
-        @php
-            $maxQty = max(array_column($topActiveClientsData, 'count'));
-        @endphp
+@php
+    $counts = array_column($topActiveClientsData, 'count');
+    $maxQty = !empty($counts) ? max($counts) : 0;
+@endphp
         @foreach($topActiveClientsData as $client)
             @php
                 $barWidth = $maxQty > 0 ? ($client['count'] / $maxQty) * 100 : 0;
@@ -180,9 +181,10 @@
 
 <div style="display: flex; align-items: flex-start;">
     <div style="flex: 1;">
-        @php
-            $maxQtyPassive = max(array_column($topPassiveClientsData, 'count'));
-        @endphp
+@php
+    $counts = array_column($topPassiveClientsData, 'count');
+    $maxQty = !empty($counts) ? max($counts) : 0;
+@endphp
         @foreach($topPassiveClientsData as $client)
             @php
                 $barWidth = $maxQtyPassive > 0 ? ($client['count'] / $maxQtyPassive) * 100 : 0;
@@ -212,9 +214,10 @@
 
 <div style="display: flex; align-items: flex-start;">
     <div style="flex: 1;">
-        @php
-            $maxQtySupplier = max(array_column($topActiveSuppliersData, 'count'));
-        @endphp
+@php
+    $counts = array_column($topActiveSuppliersData, 'count');
+    $maxQty = !empty($counts) ? max($counts) : 0;
+@endphp
         @foreach($topActiveSuppliersData as $supplier)
             @php
                 $barWidth = ($supplier['count'] / $maxQtySupplier) * 100;
@@ -245,9 +248,10 @@
 
 <div style="display: flex; align-items: flex-start;">
     <div style="flex: 1;">
-        @php
-            $maxQtyPassiveSupplier = max(array_column($topPassiveSuppliersData, 'count'));
-        @endphp
+@php
+    $counts = array_column($topPassiveSuppliersData, 'count');
+    $maxQty = !empty($counts) ? max($counts) : 0;
+@endphp
         @foreach($topPassiveSuppliersData as $supplier)
             @php
                 $barWidth = ($supplier['count'] / $maxQtyPassiveSupplier) * 100;
