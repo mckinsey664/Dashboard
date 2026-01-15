@@ -139,6 +139,10 @@ class GoogleSheetController extends Controller
             // ===========================
             // 1️⃣ BASIC COUNTS
             // ===========================
+            $colA = $this->safeGet($service, $SHEET_ID, $TAB.'A2:A');
+            $colL = $this->safeGet($service, $SHEET_ID, $TAB.'L2:L');
+
+            
             $cleanColA = array_filter($colA, function ($row) {
                 return trim($row[0] ?? '') !== '';
             });
